@@ -55,10 +55,10 @@ public class MvcController {
    * @param model
    * @return "welcome" page
    */
-	@GetMapping("/")
-	public String showWelcome(Model model) {
-		return "welcome";
-	}
+  @GetMapping("/")
+  public String showWelcome(Model model) {
+    return "welcome";
+  }
 
   /**
    * HTML GET request handler that serves the "login_form" page to the user.
@@ -69,12 +69,12 @@ public class MvcController {
    * @return "login_form" page
    */
   @GetMapping("/login")
-	public String showLoginForm(Model model) {
-		User user = new User();
-		model.addAttribute("user", user);
-		
-		return "login_form";
-	}
+  public String showLoginForm(Model model) {
+    User user = new User();
+    model.addAttribute("user", user);
+    
+    return "login_form";
+  }
 
   /**
    * HTML GET request handler that serves the "deposit_form" page to the user.
@@ -85,11 +85,11 @@ public class MvcController {
    * @return "deposit_form" page
    */
   @GetMapping("/deposit")
-	public String showDepositForm(Model model) {
+  public String showDepositForm(Model model) {
     User user = new User();
-		model.addAttribute("user", user);
-		return "deposit_form";
-	}
+    model.addAttribute("user", user);
+    return "deposit_form";
+  }
 
   /**
    * HTML GET request handler that serves the "withdraw_form" page to the user.
@@ -100,11 +100,11 @@ public class MvcController {
    * @return "withdraw_form" page
    */
   @GetMapping("/withdraw")
-	public String showWithdrawForm(Model model) {
+  public String showWithdrawForm(Model model) {
     User user = new User();
-		model.addAttribute("user", user);
-		return "withdraw_form";
-	}
+    model.addAttribute("user", user);
+    return "withdraw_form";
+  }
 
   /**
    * HTML GET request handler that serves the "dispute_form" page to the user.
@@ -115,11 +115,11 @@ public class MvcController {
    * @return "dispute_form" page
    */
   @GetMapping("/dispute")
-	public String showDisputeForm(Model model) {
+  public String showDisputeForm(Model model) {
     User user = new User();
-		model.addAttribute("user", user);
-		return "dispute_form";
-	}
+    model.addAttribute("user", user);
+    return "dispute_form";
+  }
 
   /**
    * HTML GET request handler that serves the "transfer_form" page to the user.
@@ -130,11 +130,11 @@ public class MvcController {
    * @return "dispute_form" page
    */
   @GetMapping("/transfer")
-	public String showTransferForm(Model model) {
+  public String showTransferForm(Model model) {
     User user = new User();
-		model.addAttribute("user", user);
-		return "transfer_form";
-	}
+    model.addAttribute("user", user);
+    return "transfer_form";
+  }
 
   /**
    * HTML GET request handler that serves the "buycrypto_form" page to the user.
@@ -145,11 +145,12 @@ public class MvcController {
    * @return "buycrypto_form" page
    */
   @GetMapping("/buycrypto")
-	public String showBuyCryptoForm(Model model) {
+  public String showBuyCryptoForm(Model model) {
     User user = new User();
-		model.addAttribute("user", user);
-		return "buycrypto_form";
-	}
+    user.setEthPrice(getCurrentEthValue());
+    model.addAttribute("user", user);
+    return "buycrypto_form";
+  }
 
   /**
    * HTML GET request handler that serves the "sellcrypto_form" page to the user.
@@ -160,11 +161,12 @@ public class MvcController {
    * @return "sellcrypto_form" page
    */
   @GetMapping("/sellcrypto")
-	public String showSellCryptoForm(Model model) {
+  public String showSellCryptoForm(Model model) {
     User user = new User();
-		model.addAttribute("user", user);
-		return "sellcrypto_form";
-	}
+    user.setEthPrice(getCurrentEthValue());
+    model.addAttribute("user", user);
+    return "sellcrypto_form";
+  }
 
   //// HELPER METHODS ////
 
@@ -205,10 +207,32 @@ public class MvcController {
     user.setLogs(logs);
     user.setTransactionHist(transactionHistoryOutput);
     user.setTransferHist(transferHistoryOutput);
+    user.setEthPrice(getCurrentEthValue());
+    String checkUserHasCrypto = String.format("SELECT Count(*) FROM CryptoHoldings WHERE CustomerID='%s';", user.getUsername());
+    if(checkUserHasCrypto.equals("1")) {
+      //fetch crypto holdings; i.e have the user set stuff
+      // String getHistoryUserNameAndTimeStampAndActionAndCryptoBalanceSql = String.format("SELECT CustomerID, Timestamp, Action, CryptoName, CryptoAmount FROM CryptoHistory WHERE CustomerID='%s';", user.getUsername());
+      // List<Map<String,Object>> historyQueryResults = jdbcTemplate.queryForList(getHistoryUserNameAndTimeStampAndActionAndCryptoBalanceSql);
+      // Map<String,Object> userDataHistory = historyQueryResults.get(0);
+      List<Map<String,Object>> cryptoLogs = TestudoBankRepository.getCryptoTransactions(jdbcTemplate, user.getUsername(), MAX_NUM_TRANSFERS_DISPLAYED);
+      String cryptoHistoryOutput = HTML_LINE_BREAK;
+      for(Map<String, Object> cryptoLog : cryptoLogs){
+        cryptoHistoryOutput += cryptoLog + HTML_LINE_BREAK;
+      }
+      user.setCryptoHist(cryptoHistoryOutput);
+
+      String getHoldingsUserNameAndCryptoNameAndCryptoBalanceSql = String.format("SELECT CustomerID, CryptoName, CryptoAmount FROM CryptoHoldings WHERE CustomerID='%s';", user.getUsername());
+      List<Map<String,Object>> holdingsQueryResults = jdbcTemplate.queryForList(getHoldingsUserNameAndCryptoNameAndCryptoBalanceSql);
+      Map<String,Object> userDataHoldings = holdingsQueryResults.get(0);
+
+      // double ethBalance = (int)userDataHoldings.get("CryptoAmount");
+      user.setEthBalance((double)userDataHoldings.get("CryptoAmount"));
+    }
+
   }
 
   // Converts dollar amounts in frontend to penny representation in backend MySQL DB
-  private static int convertDollarsToPennies(double dollarAmount) {
+  public static int convertDollarsToPennies(double dollarAmount) {
     return (int) (dollarAmount * 100);
   }
 
@@ -268,9 +292,9 @@ public class MvcController {
    * @return "account_info" page if login successful. Otherwise, redirect to "welcome" page.
    */
   @PostMapping("/login")
-	public String submitLoginForm(@ModelAttribute("user") User user) {
+  public String submitLoginForm(@ModelAttribute("user") User user) {
     // Print user's existing fields for debugging
-		System.out.println(user);
+    System.out.println(user);
 
     String userID = user.getUsername();
     String userPasswordAttempt = user.getPassword();
@@ -285,7 +309,7 @@ public class MvcController {
     } else {
       return "welcome";
     }
-	}
+  }
 
   /**
    * HTML POST request handler for the Deposit Form page.
@@ -357,7 +381,7 @@ public class MvcController {
     updateAccountInfo(user);
     return "account_info";
   }
-	
+  
   /**
    * HTML POST request handler for the Withdraw Form page.
    * 
@@ -625,7 +649,41 @@ public class MvcController {
    */
   @PostMapping("/buycrypto")
   public String buyCrypto(@ModelAttribute("user") User user) {
+    String username = user.getUsername();
+    String pass = user.getPassword();
+    String userPass = TestudoBankRepository.getCustomerPassword(jdbcTemplate, username);
+
+    if(pass.equals(userPass)){
+
+      //if user doesn't have enough balance
+      if(user.getBalance() <= 0){
+        return "welcome";
+      }
+      int reversals = TestudoBankRepository.getCustomerNumberOfReversals(jdbcTemplate, username);
+      double toBuy = user.getAmountToBuyCrypto();
+      int toBuyPennies = convertDollarsToPennies(toBuy * getCurrentEthValue());
+
+      // check if user is trying to buy an invalid amount of crypto or if the user did too many reversals
+      if(toBuyPennies <= 0){
+        return "welcome";
+      }else{
+
+        if(toBuy > user.getBalance()){ return "welcome";}
+
+        user.setAmountToWithdraw(toBuy);
+        submitWithdraw(user);
+
+        double toStore = toBuy/user.getEthPrice();
+        
+        String time = SQL_DATETIME_FORMATTER.format(new java.util.Date());
+        TestudoBankRepository.insertRowToCryptoLogsTable(jdbcTemplate, username, time, "BUY", "ETH", toStore);
+        TestudoBankRepository.insertRowToCryptoHoldingsTable(jdbcTemplate, username, "ETH", toStore);
+        updateAccountInfo(user);
+        return "account_info";
+      }
+    }
     return "welcome";
+    
   }
 
   /**
@@ -635,6 +693,33 @@ public class MvcController {
    */
   @PostMapping("/sellcrypto")
   public String sellCrypto(@ModelAttribute("user") User user) {
+    
+    String username = user.getUsername();
+    String pass = user.getPassword();
+    String userPass = TestudoBankRepository.getCustomerPassword(jdbcTemplate, username);
+
+    if(!pass.equals(userPass)){
+      double toSell = user.getAmountToSellCrypto();
+      int toSellPennies = convertDollarsToPennies(toSell * getCurrentEthValue());
+
+      if(toSell <= 0.0 || toSellPennies < 0){
+        return "welcome";
+      }else{
+
+        user.setAmountToDeposit(toSell);
+        submitDeposit(user);
+
+        double toStore = toSell/getCurrentEthValue();
+
+        String time = SQL_DATETIME_FORMATTER.format(new java.util.Date());
+
+        TestudoBankRepository.insertRowToCryptoLogsTable(jdbcTemplate, username, time, "Sell", "ETH", toStore);
+        TestudoBankRepository.insertRowToCryptoHoldingsTable(jdbcTemplate, username, "ETH", toStore);
+        updateAccountInfo(user);
+        return "account_info";
+      }
+    }
+
     return "welcome";
   }
 

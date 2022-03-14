@@ -47,6 +47,15 @@ public class User {
   private String transferRecipientID;
 
   @Setter @Getter
+  private double ethPrice;
+
+  @Setter @Getter
+  private double ethBalance;
+
+  @Setter @Getter
+  private String cryptoHist;
+  
+  @Setter @Getter
   private boolean isTransfer;
 
   @Setter @Getter
