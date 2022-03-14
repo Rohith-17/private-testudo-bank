@@ -36,6 +36,12 @@ public class TestudoBankRepository {
     return transactionLogs;
   }
 
+  public static List<Map<String,Object>> getCryptoTransactions(JdbcTemplate jdbcTemplate, String customerID, int numTransactionsToFetch) {
+    String getTransactionHistorySql = String.format("Select * from CryptoHistory WHERE CustomerId='%s' ORDER BY Timestamp DESC LIMIT %d;", customerID, numTransactionsToFetch);
+    List<Map<String,Object>> transactionLogs = jdbcTemplate.queryForList(getTransactionHistorySql);
+    return transactionLogs;
+  }
+
   public static List<Map<String,Object>> getTransferLogs(JdbcTemplate jdbcTemplate, String customerID, int numTransfersToFetch) {
     String getTransferHistorySql = String.format("Select * from TransferHistory WHERE TransferFrom='%s' OR TransferTo='%s' ORDER BY Timestamp DESC LIMIT %d;", customerID, customerID, numTransfersToFetch);
     List<Map<String,Object>> transferLogs = jdbcTemplate.queryForList(getTransferHistorySql);
@@ -115,6 +121,30 @@ public class TestudoBankRepository {
                                                     timestamp,
                                                     transferAmount);
     jdbcTemplate.update(transferHistoryToSql);
+  }
+  
+  public static void insertRowToCryptoLogsTable(JdbcTemplate jdbcTemplate, String customerID, String timestamp, String action, String cryptoName, double cryptoAmount) { 
+    try {
+      String cryptoHistoryToSql = String.format("INSERT INTO CryptoHistory VALUES ('%s', '%s', '%s','%s', %f);",
+                                                    customerID,
+                                                    timestamp,
+                                                    action,
+                                                    cryptoName,
+                                                    cryptoAmount);
+                jdbcTemplate.update(cryptoHistoryToSql);
+    } catch(Exception e) {
+      e.printStackTrace();
+    }
+
+
+  }
+
+  public static void insertRowToCryptoHoldingsTable(JdbcTemplate jdbcTemplate, String customerID, String cryptoName, double cryptoAmount) { 
+    String cryptoHoldingsToSql = String.format("INSERT INTO CryptoHoldings VALUES ('%s', '%s', %f);",
+                                                    customerID,
+                                                    cryptoName,
+                                                    cryptoAmount);
+    jdbcTemplate.update(cryptoHoldingsToSql);
   }
   
   public static boolean doesCustomerExist(JdbcTemplate jdbcTemplate, String customerID) { 
