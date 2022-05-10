@@ -50,7 +50,16 @@ public class User {
   private double ethPrice;
 
   @Setter @Getter
+  public double bitPrice = 36389.50;
+
+  @Setter @Getter
   private double ethBalance;
+
+  @Setter @Getter
+  private double crypto;
+
+  @Setter @Getter
+  private double bitBalance;
 
   @Setter @Getter
   private String cryptoHist;
@@ -65,8 +74,21 @@ public class User {
   private double amountToBuyCrypto;
 
   @Setter @Getter @Positive
-  private double amountToSellCrypto;
+  private double amountToBuyBit;
+
+  @Setter @Getter @Positive
+  private double amountToBuyEth;
+
+  @Setter @Getter @Positive
+  private double amountToConvertCrypto;
+
   
+  @Setter @Getter @Positive
+  private double amountToSellEth;
+
+  @Setter @Getter @Positive
+  private double amountToSellBit;
+
 	@Override
 	public String toString() {
 		return "User [username=" + username + ", password=" + password + ", balance=" + balance + "]";

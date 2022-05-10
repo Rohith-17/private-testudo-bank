@@ -6,7 +6,7 @@
 <head>
   <link rel="icon" href="https://fanapeel.com/wp-content/uploads/logo_-university-of-maryland-terrapins-testudo-turtle-hold-red-white-m.png">
   <meta charset="ISO-8859-1">
-  <title>Sell Cryptocurrency Form</title>
+  <title> Transfer Crypto Form </title>
   <style type="text/css">
     label {
       display: inline-block;
@@ -34,29 +34,29 @@
   </style>
 </head>
 <body>
-	<div align="center">
-		<form:form action="sellcrypto" method="post" modelAttribute="user">
+    <div align="center">
+		<form:form action="transfercrypto" method="post" modelAttribute="user">
 			<form:label path="username">Username:</form:label>
 			<form:input path="username"/><br/>
 
 			<form:label path="password">Password:</form:label>
 			<form:password path="password"/><br/>		
 
-      <form:label path="amountToSellEth">Amount to Sell (Ethereum):</form:label>
-			<form:input path="amountToSellEth"/><br/>	
+      <form:label path="amountToConvertCrypto">Amount of Ethereum to Convert:</form:label>
+			<form:input path="amountToConvertCrypto"/><br/>	
       <span>Current $ETH Price: </span><span>${user.ethPrice}</span><br/>
       <br>
-      <form:button>Sell Ethereum</form:button>
-      
+
+      <form:button>Buy Ethereum</form:button>
+
       <br>
-      
-      <form:label path="amountToSellBit">Amount to Sell (Bitcoin):</form:label>
-			<form:input path="amountToSellBit"/><br/>	
+      <form:label path="amountToConvertCrypto">Amount of Bitcoin to Convert:</form:label>
+			<form:input path="amountToConvertCrypto"/><br/>	
       <span>Current $BIT Price: </span><span>${user.bitPrice}</span><br/>
-      <form:button>Sell Bitcoin</form:button>
+      <br>
+      <form:button>Buy Bitcoin</form:button>
       
 		</form:form>
     <a href='/'>Home</a>
 	</div>
 </body>
-</html>

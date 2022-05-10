@@ -33,6 +33,8 @@
     <span>Balance is: $</span><span>${user.balance}</span><br/>
     <span>Current $ETH Price: </span><span>${user.ethPrice}</span><br/>
     <span>Your $ETH Balance: </span><span>${user.ethBalance}</span><br/>
+    <span>Current $BIT Price: </span><span>${user.bitPrice}</span><br/>
+    <span>Your $BIT Balance: </span><span>${user.bitBalance}</span><br/>
     <span>Overdraft Balance is: $</span><span>${user.overDraftBalance}</span><br/>
     <span>Re-payment logs: </span><span>${user.logs}</span><br/>
     <span>Transaction History: </span><span>${user.transactionHist}</span><br/>
@@ -43,6 +45,7 @@
     <a href='/withdraw'>Withdraw</a>
     <a href='/dispute'>Dispute</a>
     <a href='/transfer'>Transfer</a>
+    <a href='/transfercrypto'>Transfer Crypto</a> <br/>
     <a href='/'>Logout</a>
 	</div>
 </body>

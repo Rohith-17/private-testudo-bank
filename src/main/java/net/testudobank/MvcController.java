@@ -660,24 +660,33 @@ public class MvcController {
         return "welcome";
       }
       int reversals = TestudoBankRepository.getCustomerNumberOfReversals(jdbcTemplate, username);
-      double toBuy = user.getAmountToBuyCrypto();
-      int toBuyPennies = convertDollarsToPennies(toBuy * getCurrentEthValue());
+      double toBuyEth = user.getAmountToBuyEth();
+      double toBuyBit = user.getAmountToBuyBit();
+
+      int toBuyPenniesEth = convertDollarsToPennies(toBuyEth * getCurrentEthValue());
+      int toBuyPenniesBit = convertDollarsToPennies(toBuyBit * getCurrentEthValue());
 
       // check if user is trying to buy an invalid amount of crypto or if the user did too many reversals
-      if(toBuyPennies <= 0){
+      if(toBuyPenniesEth <= 0 && toBuyPenniesBit <=0){
         return "welcome";
       }else{
 
-        if(toBuy > user.getBalance()){ return "welcome";}
+        if(toBuyEth > user.getBalance() || toBuyBit > user.getBalance()){ return "welcome";}
 
-        user.setAmountToWithdraw(toBuy);
+        user.setAmountToWithdraw(toBuyEth);
+        user.setAmountToWithdraw(toBuyBit);
         submitWithdraw(user);
 
-        double toStore = toBuy/user.getEthPrice();
-        
+        double toStore = toBuyEth/user.getEthPrice();
+        double toStore2 = toBuyBit/user.bitPrice;
+
         String time = SQL_DATETIME_FORMATTER.format(new java.util.Date());
         TestudoBankRepository.insertRowToCryptoLogsTable(jdbcTemplate, username, time, "BUY", "ETH", toStore);
         TestudoBankRepository.insertRowToCryptoHoldingsTable(jdbcTemplate, username, "ETH", toStore);
+
+        TestudoBankRepository.insertRowToCryptoLogsTable(jdbcTemplate, username, time, "BUY", "BIT", toStore2);
+        TestudoBankRepository.insertRowToCryptoHoldingsTable(jdbcTemplate, username, "BIT", toStore2);
+
         updateAccountInfo(user);
         return "account_info";
       }
@@ -699,22 +708,31 @@ public class MvcController {
     String userPass = TestudoBankRepository.getCustomerPassword(jdbcTemplate, username);
 
     if(!pass.equals(userPass)){
-      double toSell = user.getAmountToSellCrypto();
-      int toSellPennies = convertDollarsToPennies(toSell * getCurrentEthValue());
+      double toSellBit = user.getAmountToSellBit();
+      double toSellEth = user.getAmountToSellEth();
 
-      if(toSell <= 0.0 || toSellPennies < 0){
+      int toSellPenniesEth = convertDollarsToPennies(toSellEth * getCurrentEthValue());
+      int toSellPenniesBit = convertDollarsToPennies(toSellBit * user.bitPrice);
+
+      if(toSellEth <= 0.0 || toSellPenniesEth < 0 && toSellBit < 0.0 || toSellPenniesBit < 0){
         return "welcome";
       }else{
 
-        user.setAmountToDeposit(toSell);
+        user.setAmountToDeposit(toSellBit);
+        user.setAmountToDeposit(toSellEth);
         submitDeposit(user);
 
-        double toStore = toSell/getCurrentEthValue();
+        double toStore = toSellEth/getCurrentEthValue();
+        double toStore2 = toSellBit/user.bitPrice;
 
         String time = SQL_DATETIME_FORMATTER.format(new java.util.Date());
 
         TestudoBankRepository.insertRowToCryptoLogsTable(jdbcTemplate, username, time, "Sell", "ETH", toStore);
         TestudoBankRepository.insertRowToCryptoHoldingsTable(jdbcTemplate, username, "ETH", toStore);
+
+        TestudoBankRepository.insertRowToCryptoLogsTable(jdbcTemplate, username, time, "Sell", "BIT", toStore2);
+        TestudoBankRepository.insertRowToCryptoHoldingsTable(jdbcTemplate, username, "BIT", toStore2);
+
         updateAccountInfo(user);
         return "account_info";
       }
