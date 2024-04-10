@@ -496,7 +496,7 @@ public class MvcController {
     double reversalAmount = reversalAmountInPennies / 100.0;
 
     // If transaction to reverse is a deposit, then withdraw the money out
-    if (((String) logToReverse.get("Action")).toLowerCase().equals("deposit")) {
+    if ("deposit".equals(((String) logToReverse.get("Action")).toLowerCase())) {
       // if withdraw would exceed max overdraft possible, return welcome
       if (userOverdraftBalanceInPennies + (reversalAmountInPennies - userBalanceInPennies) > MAX_OVERDRAFT_IN_PENNIES) {
         return "welcome";
